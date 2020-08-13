@@ -63,6 +63,9 @@ class ModelBuilder:
         self.labels_tensor = None
         self.labels_evaluated = None
 
+        self.random_noise_input = None
+        self.fgsm_noise_input = None
+
         self.optimizer = tf.compat.v1.train.AdagradOptimizer(
             learning_rate=constants._LEARNING_RATE)
 
@@ -187,6 +190,11 @@ class ModelBuilder:
         noise = get_perturbed_input(
             self, self.answer_number, self.perturb_amount)
         noise_input = np.add(self.embedded_features_evaluated, noise)
+
+        if self.random_noise:
+            self.random_noise_input = noise_input
+        else:
+            self.fgsm_noise_input = noise_input
 
         return tf.convert_to_tensor(noise_input, dtype=tf.float32)
 
