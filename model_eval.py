@@ -4,32 +4,40 @@ from print_answers import *
 
 """Functions to help with evaluation of model outside of model_builder"""
 
+
 def run(model_builder, ranker, path, new_question):
-  '''
-  Saves information for perturbation and creates ranking arrays based on usesr input.
+    '''
+    Saves information for perturbation and creates ranking arrays based on usesr input.
 
-  Args:
-      model_builder: The model in use.
-      Ranker: Ranking object
-      path: The path to test or training dataset.
-      new_question: Boolean indicating if a new random question should be evaluated
-  '''
-  reset_flags(model_builder, new_question)
+    Args:
+        model_builder: The model in use.
+        Ranker: Ranking object
+        path: The path to test or training dataset.
+        new_question: Boolean indicating if a new random question should be evaluated
+    '''
+    reset_flags(model_builder, new_question)
 
-  model_builder.ranking_array = create_unperturbed_ranking_array(model_builder, ranker, path)
-  print_ranked_answers(model_builder, model_builder.ranking_array)
+    model_builder.ranking_array = create_unperturbed_ranking_array(
+        model_builder, ranker, path)
+    print_ranked_answers(model_builder, model_builder.ranking_array)
 
-  answer_num = int(input("Please select an answer to be perturbed: "))
-  model_builder.answer_number = convert_question_num(model_builder, answer_num)
-  reference_num = int(input("Please select a reference answer: "))
-  model_builder.reference_number = convert_question_num(model_builder, reference_num)
-  model_builder.perturb_amount = float(input("Please select an amount of perturbation: "))
+    answer_num = int(input("Please select an answer to be perturbed: "))
+    model_builder.answer_number = convert_question_num(
+        model_builder, answer_num)
+    reference_num = int(input("Please select a reference answer: "))
+    model_builder.reference_number = convert_question_num(
+        model_builder, reference_num)
+    model_builder.perturb_amount = float(
+        input("Please select an amount of perturbation: "))
 
-  model_builder.perturbed_ranking_array = create_fgsm_ranking_array(model_builder, ranker, path)
-  model_builder.random_ranking_array = create_random_ranking_array(model_builder, ranker, path)
+    model_builder.perturbed_ranking_array = create_fgsm_ranking_array(
+        model_builder, ranker, path)
+    model_builder.random_ranking_array = create_random_ranking_array(
+        model_builder, ranker, path)
 
-  remove_padding(model_builder)
-  print_ranked_answers(model_builder, model_builder.perturbed_ranking_array)
+    remove_padding(model_builder)
+    print_ranked_answers(model_builder, model_builder.perturbed_ranking_array)
+
 
 def init_variables(
         model_builder,
@@ -54,31 +62,38 @@ def init_variables(
     model_builder.answer_number = answer_num
     model_builder.reference_number = reference_num
 
-    model_builder.ranking_array = create_unperturbed_ranking_array(model_builder, ranker, path)
-    model_builder.perturbed_ranking_array = create_fgsm_ranking_array(model_builder, ranker, path)
-    model_builder.random_ranking_array = create_random_ranking_array(model_builder, ranker, path)
+    model_builder.ranking_array = create_unperturbed_ranking_array(
+        model_builder, ranker, path)
+    model_builder.perturbed_ranking_array = create_fgsm_ranking_array(
+        model_builder, ranker, path)
+    model_builder.random_ranking_array = create_random_ranking_array(
+        model_builder, ranker, path)
 
     remove_padding(model_builder)
 
-def create_unperturbed_ranking_array(model_builder, ranker, path):
-  predictions = model_builder.custom_predict(
-      False, ranker, input_fn=lambda: model_builder.predict_input_fn(path))
 
-  return next(predictions)
+def create_unperturbed_ranking_array(model_builder, ranker, path):
+    predictions = model_builder.custom_predict(
+        False, ranker, input_fn=lambda: model_builder.predict_input_fn(path))
+
+    return next(predictions)
+
 
 def create_fgsm_ranking_array(model_builder, ranker, path):
-  model_builder.perturb_amount = model_builder.perturb_amount * get_fgsm_direction(model_builder, model_builder.ranking_array)
-  predictions = model_builder.custom_predict(
-      True, ranker, input_fn=lambda: model_builder.predict_input_fn(path))
+    model_builder.perturb_amount = model_builder.perturb_amount * \
+        get_fgsm_direction(model_builder, model_builder.ranking_array)
+    predictions = model_builder.custom_predict(
+        True, ranker, input_fn=lambda: model_builder.predict_input_fn(path))
 
-  return next(predictions)
+    return next(predictions)
+
 
 def create_random_ranking_array(model_builder, ranker, path):
-  model_builder.random_noise = True
-  predictions = model_builder.custom_predict(
-      True, ranker, input_fn=lambda: model_builder.predict_input_fn(path))
+    model_builder.random_noise = True
+    predictions = model_builder.custom_predict(
+        True, ranker, input_fn=lambda: model_builder.predict_input_fn(path))
 
-  return next(predictions)
+    return next(predictions)
 
 
 def get_fgsm_direction(model_builder, ranking_array):
@@ -91,7 +106,7 @@ def get_fgsm_direction(model_builder, ranking_array):
       ranking_array: Original nonperturbed array of answer rankings.
 
     Returns:
-      1 or -1 where 1 indicates increasing the rank of the perturbed question 
+      1 or -1 where 1 indicates increasing the rank of the perturbed question
       and -1 indicates decreasing the rank of the perturbed question.
     """
     if ranking_array[model_builder.answer_number] > ranking_array[model_builder.reference_number]:
@@ -100,6 +115,7 @@ def get_fgsm_direction(model_builder, ranking_array):
     else:
         print("----------------Increasing rank of question----------------")
         return 1
+
 
 def reset_flags(model_builder, new_question):
     """
@@ -114,43 +130,46 @@ def reset_flags(model_builder, new_question):
         model_builder.first_eval = False
     model_builder.random_noise = False
 
+
 def convert_question_num(model_builder, answer_num):
-  '''
-  Converts the question number (based on sorted answers)
-  that the user selects externally to interal question number
+    '''
+    Converts the question number (based on sorted answers)
+    that the user selects externally to interal question number
 
-  Args:
-    model_builder: The model in use.
-    answer_num: Answer number selected externally by user
+    Args:
+      model_builder: The model in use.
+      answer_num: Answer number selected externally by user
 
-  Returns:
-    Question number for internal use.
-  '''
-  answer_length = get_answer_size(model_builder)
-  no_padding_ranking = model_builder.ranking_array[:answer_length]
+    Returns:
+      Question number for internal use.
+    '''
+    answer_length = get_answer_size(model_builder)
+    no_padding_ranking = model_builder.ranking_array[:answer_length]
 
-  count = 0
-  rank_w_question = []
-  for rank in no_padding_ranking:
-    rank_w_question.append((count, rank))
-    count += 1
-  rank_w_question.sort(key=lambda x: x[1], reverse=True)
+    count = 0
+    rank_w_question = []
+    for rank in no_padding_ranking:
+        rank_w_question.append((count, rank))
+        count += 1
+    rank_w_question.sort(key=lambda x: x[1], reverse=True)
 
-  return rank_w_question[answer_num - 1][0]
+    return rank_w_question[answer_num - 1][0]
+
 
 def remove_padding(model_builder):
-  '''
-  Removes padding from ranking arrays
+    '''
+    Removes padding from ranking arrays
 
-  Args:
-    model_builder: The model in use.
+    Args:
+      model_builder: The model in use.
 
-  '''
-  answer_length = get_answer_size(model_builder)
-  model_builder.perturbed_ranking_array = model_builder.perturbed_ranking_array[
-      :answer_length]
-  model_builder.ranking_array = model_builder.ranking_array[:answer_length]
-  model_builder.random_ranking_array = model_builder.random_ranking_array[:answer_length]
+    '''
+    answer_length = get_answer_size(model_builder)
+    model_builder.perturbed_ranking_array = model_builder.perturbed_ranking_array[
+        :answer_length]
+    model_builder.ranking_array = model_builder.ranking_array[:answer_length]
+    model_builder.random_ranking_array = model_builder.random_ranking_array[:answer_length]
+
 
 def get_answer_size(model_builder):
     """
