@@ -7,7 +7,7 @@ from print_answers import *
 
 def run(model_builder, ranker, path, new_question):
     '''
-    Saves information for perturbation and creates ranking arrays based on usesr input.
+    Saves information for perturbation and creates ranking arrays based on user input.
 
     Args:
         model_builder: The model in use.
@@ -73,15 +73,37 @@ def init_variables(
 
 
 def create_unperturbed_ranking_array(model_builder, ranker, path):
+    '''
+      Creates unperturbed ranking array.
+
+      Args:
+        model_builder: The model in use.
+        ranker: ranker: Ranking object.
+        path: The path to test or training dataset.
+
+      Returns:
+        Array containing ranks based on unperturbed input
+    '''
     predictions = model_builder.custom_predict(
-        False, ranker, input_fn=lambda: model_builder.predict_input_fn(path))
+    False, ranker, input_fn=lambda: model_builder.predict_input_fn(path))
 
     return next(predictions)
 
 
 def create_fgsm_ranking_array(model_builder, ranker, path):
+    '''
+    Creates fgsm perturbed ranking array.
+
+    Args:
+      model_builder: The model in use.
+      ranker: ranker: Ranking object.
+      path: The path to test or training dataset.
+
+    Returns:
+        Array containing ranks based on fgsm perturbed input.
+    '''
     model_builder.perturb_amount = model_builder.perturb_amount * \
-        get_fgsm_direction(model_builder, model_builder.ranking_array)
+        get_fgsm_direction(model_builder)
     predictions = model_builder.custom_predict(
         True, ranker, input_fn=lambda: model_builder.predict_input_fn(path))
 
@@ -89,14 +111,61 @@ def create_fgsm_ranking_array(model_builder, ranker, path):
 
 
 def create_random_ranking_array(model_builder, ranker, path):
+    '''
+    Creates randomly perturbed ranking array. Note that ranking array is 
+    repeatedly created until direction of perturbation matches the direction
+    of fgsm perturbation. 
+
+    Args:
+      model_builder: The model in use.
+      ranker: ranker: Ranking object.
+      path: The path to test or training dataset.
+
+    Returns:
+    Array containing ranks based on randomly perturbed input.
+    '''
     model_builder.random_noise = True
     predictions = model_builder.custom_predict(
         True, ranker, input_fn=lambda: model_builder.predict_input_fn(path))
 
-    return next(predictions)
+    rand_ranks = next(predictions)
+
+    count = 0
+    while correct_rand_noise_direction(model_builder, rand_ranks) == False:
+        predictions = model_builder.custom_predict(
+            True, ranker, input_fn=lambda: model_builder.predict_input_fn(path))
+        rand_ranks = next(predictions)
+        count += 1
+        if count == 5:
+            print("Timeout: No random noise created")
+            return [0]*constants._LIST_SIZE
+    return rand_ranks
+
+def correct_rand_noise_direction(model_builder, random_ranking_array):
+    """
+    Determines if randomly perturbed rank is perturbed in the same direction as
+    fgsm perturbation.
+
+    Args:
+      model_builder: The model in use.
+      random_ranking_array: Array of ranks based on randomly perturbed input.
+
+    Returns:
+      True if perturbation is in same direction as fgsm perturbation, False otherwise.
+    """
+    rank = model_builder.ranking_array[model_builder.answer_number]
+    rand_rank = random_ranking_array[model_builder.answer_number]
+
+    if get_fgsm_direction(model_builder) == 1:
+      if rand_rank >= rank:
+        return True
+    else:
+      if rand_rank <= rank:
+        return True
+    return False
 
 
-def get_fgsm_direction(model_builder, ranking_array):
+def get_fgsm_direction(model_builder):
     """
     Determines whether to increase or decrease ranking so that perturbed
      question ranking approaches reference answer ranking.
@@ -109,7 +178,7 @@ def get_fgsm_direction(model_builder, ranking_array):
       1 or -1 where 1 indicates increasing the rank of the perturbed question
       and -1 indicates decreasing the rank of the perturbed question.
     """
-    if ranking_array[model_builder.answer_number] > ranking_array[model_builder.reference_number]:
+    if model_builder.ranking_array[model_builder.answer_number] > model_builder.ranking_array[model_builder.reference_number]:
         print("----------------Decreasing rank of question----------------")
         return -1
     else:
