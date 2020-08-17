@@ -50,8 +50,17 @@ wget -O "train.tfrecords" "http://ciir.cs.umass.edu/downloads/Antique/tf-ranking
 wget -O "test.tfrecords" "http://ciir.cs.umass.edu/downloads/Antique/tf-ranking//ELWC/test.tfrecords"
 ```
 ## Running the Code
+The code can be executed by calling the following:
+```
+python main.py directory_name/
+```
+If no argument is filled in for the directory, visualizations will be saved in the current directory by default. 
 
+Upon running the code, a query of will be displayed alongside a list of questions ranked in order of relevance. The user can then select a question to be perturbed, a reference answer, and the amount of perturbation. The reference answer serves to indicate the direction of the perturbation. For instance, if the reference answer has a higher rank than the specified answer to be perturbed, the perturbation will increase the rank of the answer. Then the model will rank the answers again, this time with the perturbed input. For comparison purposes, the model will rank the answers one last time with randomly generated (as opposed to generated with FGSM) noise to demonstrate the larger effect FGSM generated noise tends to have on the model. Then a bar plot demonstrating the rankings of both the unperturbed, FGSM-perturbed, and randomly perturbed inputs will be displayed and saved to the specified folder. Other visualizations (described below) can also be added.
 
 
 ## Visualizations
+
+
+
 
