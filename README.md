@@ -61,6 +61,13 @@ Upon running the code, a query of will be displayed alongside a list of question
 
 ## Visualizations
 
+![alt text](https://github.com/googleinterns/hotels-ranking-adversarial/blob/code-review/images/Bar_ranking_graph.JPG  "Ranking Bar Graph")
+This graph illustrates the differences in rank between the unperturbed, FGSM-perturbed and randomly perturbed input. We observe that the FGSM generated noise has substancially more effect on the ranking than the randomly generated noise. Note that the answer ID does not necessarily correlate to the ordering of the questions based on rank. Rather it is the order in which the answers show up in the original ranking array.
 
+![alt text](https://github.com/googleinterns/hotels-ranking-adversarial/blob/code-review/images/Embedding_graph.JPG  "Embedding Graph")
+The graph above illustrates the answer embeddings for the unperturbed, FGSM-perturbed and randomly perturbed input. We observe that the magnitude of pertubation between the FGSM and randomly generated noise is the same, although the direction can be different.
+
+![alt text](https://github.com/googleinterns/hotels-ranking-adversarial/blob/code-review/images/perturbation_vs_epsilon_graph.JPG  "Perturbation vs Epsilon Graph")
+This graph illustrates the relationship between epsilon and the amount of pertubation. We quantify the amount of perturbation by calculating the difference between the original ranking and the perturbed ranking for the specified question. Again, we observe that the FGSM generated noise outperforms the randomly generated noise. Additionally, we observe a larger value of epsilon results in a larger magnitude of perturbation.
 
 
