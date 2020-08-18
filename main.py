@@ -1,9 +1,7 @@
 import sys
 from visualizations import *
 from model_builder import *
-
-_TEST_DATA_PATH = "test.tfrecords"
-
+import constants
 
 if __name__ == "__main__":
 	 # Turn off console warning
@@ -14,6 +12,20 @@ if __name__ == "__main__":
     model_builder = ModelBuilder()
     ranker = model_builder.run_training()
 
-    init_variables(model_builder, ranker, _TEST_DATA_PATH, 0, .05, 1, True)
+    run(model_builder, ranker, constants._TEST_DATA_PATH, True)
+    display_ranking_bar_graph(model_builder, sys.argv)
+    display_embedding_graph(model_builder, sys.argv)
 
-    save_ranking_bar_graph(model_builder, sys.argv)
+    #Optionally input parameters manually
+    '''
+    init_variables(model_builder, ranker, constants._TEST_DATA_PATH, 1, .1, 3, True)
+    display_ranking_bar_graph(model_builder, sys.argv)
+    display_embedding_graph(model_builder, sys.argv)
+    '''
+
+    #Additional optional visualizations
+    #Note these may take a minute to run due to
+    #data collection
+    '''
+    perturbation_vs_epsilon_graph(model_builder, ranker, 1, 2, sys.argv)
+    '''

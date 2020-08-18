@@ -21,7 +21,8 @@ def _create_answer_array(model_builder):
       An array containing the unranked answers for question selected.
     """
     doc_tensor = model_builder.answer_features_evaluated  
-    values = doc_tensor.values  
+    values = doc_tensor.values 
+    indices = doc_tensor.indices 
 
     answer_array = []
     single_answer = ''
@@ -41,7 +42,7 @@ def _create_answer_array(model_builder):
     return answer_array
 
 
-def _create_ranked_answers_array(model_builder, ranking_array):
+def create_ranked_answers_array(model_builder, ranking_array):
     """Combines an array of ranks with an array of features to create an array 
     relating each answer with its associated rank. Used for printing answers.
 
@@ -74,7 +75,7 @@ def print_ranked_answers(model_builder, ranking_array):
       ranking_array: Array containing ranks of all answers.
     """
 
-    ranked_answers = _create_ranked_answers_array(model_builder, ranking_array)
+    ranked_answers = create_ranked_answers_array(model_builder, ranking_array)
 
     print('\n------------------------------------------------------------------')
     _print_query(model_builder)
@@ -104,3 +105,5 @@ def print_settings(model_builder):
         _create_answer_array(model_builder)[
             model_builder.answer_number])
     print("Perturb amount: ", model_builder.perturb_amount)
+
+

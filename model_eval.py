@@ -21,21 +21,16 @@ def run(model_builder, ranker, path, new_question):
         model_builder, ranker, path)
     print_ranked_answers(model_builder, model_builder.ranking_array)
 
-    answer_num = int(input("Please select an answer to be perturbed: "))
-    model_builder.answer_number = convert_question_num(
-        model_builder, answer_num)
-    reference_num = int(input("Please select a reference answer: "))
-    model_builder.reference_number = convert_question_num(
-        model_builder, reference_num)
-    model_builder.perturb_amount = float(
+    user_answer_num = int(input("Please select an answer to be perturbed: "))
+    answer_num = convert_question_num(
+        model_builder, user_answer_num)
+    user_reference_num = int(input("Please select a reference answer: "))
+    reference_num = convert_question_num(
+        model_builder, user_reference_num)
+    perturb_amount = float(
         input("Please select an amount of perturbation: "))
 
-    model_builder.perturbed_ranking_array = create_fgsm_ranking_array(
-        model_builder, ranker, path)
-    model_builder.random_ranking_array = create_random_ranking_array(
-        model_builder, ranker, path)
-
-    remove_padding(model_builder)
+    init_variables(model_builder, ranker, path, answer_num, perturb_amount, reference_num, False)
     print_ranked_answers(model_builder, model_builder.perturbed_ranking_array)
 
 
@@ -114,7 +109,7 @@ def create_random_ranking_array(model_builder, ranker, path):
     '''
     Creates randomly perturbed ranking array. Note that ranking array is 
     repeatedly created until direction of perturbation matches the direction
-    of fgsm perturbation. 
+    of fgsm perturbation. If after 5 tries result is still un
 
     Args:
       model_builder: The model in use.
@@ -138,7 +133,8 @@ def create_random_ranking_array(model_builder, ranker, path):
         count += 1
         if count == 5:
             print("Timeout: No random noise created")
-            return [0]*constants._LIST_SIZE
+            return model_builder.ranking_array
+    model_builder.random_noise = False
     return rand_ranks
 
 def correct_rand_noise_direction(model_builder, random_ranking_array):
@@ -179,10 +175,10 @@ def get_fgsm_direction(model_builder):
       and -1 indicates decreasing the rank of the perturbed question.
     """
     if model_builder.ranking_array[model_builder.answer_number] > model_builder.ranking_array[model_builder.reference_number]:
-        print("----------------Decreasing rank of question----------------")
+        #print("----------------Decreasing rank of question----------------")
         return -1
     else:
-        print("----------------Increasing rank of question----------------")
+        #print("----------------Increasing rank of question----------------")
         return 1
 
 
@@ -193,11 +189,42 @@ def reset_flags(model_builder, new_question):
     Args:
       model_builder: The model in use
     """
+    '''
+    # Arrays with ranks of answers
+    model_builder.ranking_array = []
+    model_builder.perturbed_ranking_array = []
+    model_builder.random_ranking_array = []
+
+    # Array containing answer embeddings.
+    model_builder.embedded_features_tensor = None
+    model_builder.embedded_features_evaluated = [
+        [0.0] * constants._FULL_EMBEDDING] * constants._LIST_SIZE
+
+    # Array containing values for weights in first dense layer and gradient
+    # of logits wrt to those weights. Used for FGSM calculation.
+    model_builder.grad_variable_pair_tensor = None
+    model_builder.grad_variable_pair_evaluated = [
+        [[0] * constants._HIDDEN_LAYER_DIMS[0]] * constants._FULL_EMBEDDING] * 2
+    
+    # Textual features used for printing question/answers.
+    model_builder.query_features = None
+    model_builder.query_features_evaluated = None
+    model_builder.answer_features = None
+    model_builder.answer_features_evaluated = None
+    
+
+    # Labels used to determine number of answers/remove padding.
+    model_builder.labels_tensor = None
+    model_builder.labels_evaluated = [0]*constants._LIST_SIZE
+
+    model_builder.random_noise_input = None
+    model_builder.fgsm_noise_input = None
+    '''
     if new_question:
         model_builder.first_eval = True
     else:
         model_builder.first_eval = False
-    model_builder.random_noise = False
+    
 
 
 def convert_question_num(model_builder, answer_num):

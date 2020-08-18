@@ -61,9 +61,9 @@ class ModelBuilder:
 
         # Labels used to determine number of answers/remove padding.
         self.labels_tensor = None
-        self.labels_evaluated = None
+        self.labels_evaluated = [0] * constants._LIST_SIZE
 
-        self.random_noise_input = None
+        self.random_noise_input = produce_random_noise()
         self.fgsm_noise_input = None
 
         self.optimizer = tf.compat.v1.train.AdagradOptimizer(
@@ -190,11 +190,6 @@ class ModelBuilder:
         noise = get_perturbed_input(
             self, self.answer_number, self.perturb_amount)
         noise_input = np.add(self.embedded_features_evaluated, noise)
-
-        if self.random_noise:
-            self.random_noise_input = noise_input
-        else:
-            self.fgsm_noise_input = noise_input
 
         return tf.convert_to_tensor(noise_input, dtype=tf.float32)
 
@@ -377,6 +372,7 @@ class ModelBuilder:
                         self.grad_variable_pair_evaluated = temp_grad_variable_pair_evaluated
                         self.labels_evaluated = temp_labels_evaluated
                         self.normalized_features_evaluated = temp_normalized_features_evaluated
+                        self.random_noise_input = produce_random_noise()
                         self.first_eval = False
 
                     if not yield_single_examples:

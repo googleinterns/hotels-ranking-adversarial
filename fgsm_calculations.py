@@ -82,10 +82,10 @@ def get_perturbed_input(model_builder, answer_num, perturb_amount):
     noise = [[0] * constants._FULL_EMBEDDING] * constants._LIST_SIZE
 
     if(model_builder.random_noise):
-        direction = produce_random_noise()
+        direction = model_builder.random_noise_input
     else:
         direction = np.sign(_get_perturb_dir(model_builder, answer_num))
-
+        model_builder.fgsm_noise_input = direction
     scaled_direction = np.multiply(model_builder.perturb_amount, direction)
     noise[answer_num] = scaled_direction.tolist()
 
