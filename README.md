@@ -10,7 +10,7 @@ An adversarial example is a specialized input meant to confuse a neural network.
 However, adversarial examples can exist outside of the realm of image classification. In this repository we focus on the generation of adversarial examples within the context of a learning to rank (LTR) neural network. 
 
 ## Fast Gradient Signed Method
-The fast gradient sign method works by using the gradients of the neural network to develop an adversarial example. For an input the method calculates the gradients of loss with respect to the input features to create a new perturbed input that maximizes the loss. This allows the neural network to be fooled even with a very small amount of perturbation. This new input is our adversarial example. This method can be encapsulated with the following equation:
+The fast gradient sign method works by using the gradients of the neural network to develop an adversarial example. For an input, the method calculates the gradients of loss with respect to the input features to create a new perturbed input that maximizes the loss. This allows the neural network to be fooled even with a very small amount of perturbation. This new input is our adversarial example. This method can be encapsulated with the following equation:
 
 ![alt text](https://github.com/googleinterns/hotels-ranking-adversarial/blob/code-review/images/fgsm.png  "FGSM Equation")
 
@@ -20,13 +20,15 @@ where
 * ∇J(θ, x, y) is the gradient of loss with respect to the feature
 
 ## Tf-Ranking Model & ANTIQUE Dataset
-This repository builds upon the [TF-Ranking for sparse features tutorial](https://github.com/tensorflow/ranking/blob/master/tensorflow_ranking/examples/handling_sparse_features.ipynb), which provides a learning to rank neural network for [ANTIQUE](https://ciir.cs.umass.edu/downloads/Antique/), a question-answering dataset. Given a query, and a list of answers the neural network seeks to maximize a rank related metric (NDCG is used in this example).
+This repository builds upon the [TF-Ranking for sparse features tutorial](https://github.com/tensorflow/ranking/blob/master/tensorflow_ranking/examples/handling_sparse_features.ipynb), which provides a learning to rank neural network for [ANTIQUE](https://ciir.cs.umass.edu/downloads/Antique/), a question-answering dataset. Given a query and a list of answers, the neural network seeks to maximize a rank related metric (NDCG is used in this example). Although not directly applicable to Hotels Ranking, this dataset and model were chosen since they are open-source and provide a suitable framework for ranking with textual data.
 
 ANTIQUE is a public dataset for non-factoid question answering collected over Yahoo! answers. Each question has a list of associated answers whose relevance has been ranked on a 1-5 scale. The list size may vary depending on the query so a “fixed list size” of 50 is always used. The list is truncated or padded with dummy values accordingly. The dataset is split into 2206 queries for training and 200 queries for testing. More details can be found with the technical paper found [here](https://arxiv.org/pdf/1905.08957.pdf).
 
 The general architecture of the model (without adversarial examples) is pictured below. More details can be found within the Tf-Ranking Tutorial mentioned previously.
 
 ![alt text](https://github.com/googleinterns/hotels-ranking-adversarial/blob/code-review/images/model_achitecture.JPG  "Model Architecture Diagram")
+
+For the purpose of generating adversarial examples, we focus on the model during the serving stage. The model takes in the raw textual data via the input_fn function and then converts it to numerical embeddings via the transform_fn function. This data can then be passed into to the scoring function and receive a corresponding ranking. When calculating the scores for unperturbed input the model simultaneously calculates the gradient required to generate adversarial noise. Then, the model can take in our perturbed input that consists of the answer embeddings in addition to our adversarial noise.
 
 ## Setup
 To run the files the following is required:
