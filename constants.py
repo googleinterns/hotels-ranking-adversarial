@@ -1,3 +1,5 @@
+import numpy as np
+
 """Constants to be used across files"""
 
 # Paths to files containing training and test instances.
@@ -35,3 +37,22 @@ _NUM_TRAIN_STEPS = 16000
 _EMBEDDING_DIMENSION = 20
 # Embedding Dimension to encode both question and answer
 _FULL_EMBEDDING = _EMBEDDING_DIMENSION * 2
+
+# Amount of tries to generate random noise.
+_TIMEOUT = 4
+
+# Formatting for visualizations.
+_GREEN = '#3CAEA3'
+_BLUE = '#20639B'
+_RED = '#ED553B'
+_YELLOW = '#FCE205'
+_FONT_SIZE = 22
+_BAR_WIDTH = 0.25
+_FIG_SIZE = (22, 8)
+
+# Other visualization constants.
+_EPSILONS = np.arange(.1, .5, .1)
+
+_RANKING_FILENAME = "ranking_bar_plot.png"
+_EMBEDDING_FILENAME = "embedding_bar_plot.png"
+_EPSILON_FILENAME = "perturbation_v_epsilon_plot.png"

@@ -1,3 +1,5 @@
+"""Methods used to print queries/answers"""
+
 def _print_query(model_builder):
     """Prints singular question.
 
@@ -9,7 +11,6 @@ def _print_query(model_builder):
 
     for word in values:
         print(word.decode("utf-8"), end=' ')
-
 
 def _create_answer_array(model_builder):
     """Creates and returns an array of unranked answers.
@@ -41,7 +42,6 @@ def _create_answer_array(model_builder):
 
     return answer_array
 
-
 def create_ranked_answers_array(model_builder, ranking_array):
     """Combines an array of ranks with an array of features to create an array 
     relating each answer with its associated rank. Used for printing answers.
@@ -66,7 +66,6 @@ def create_ranked_answers_array(model_builder, ranking_array):
 
     return ranked_answers
 
-
 def print_ranked_answers(model_builder, ranking_array):
     """Prints question and associated answers according to ranking.
 
@@ -86,7 +85,6 @@ def print_ranked_answers(model_builder, ranking_array):
         print(count, ') ', end='')
         print(answer_rank_pair[0], '\n')
         count += 1
-
 
 def print_settings(model_builder):
     '''

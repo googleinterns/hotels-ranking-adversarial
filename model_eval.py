@@ -2,11 +2,8 @@ import numpy as np
 import constants
 from print_answers import *
 from fgsm_calculations import *
-import copy
 
 """Functions to help with evaluation of model outside of model_builder"""
-
-_TIMEOUT = 4
 
 def run(model_builder, ranker, path, new_question):
     '''
@@ -19,11 +16,11 @@ def run(model_builder, ranker, path, new_question):
         new_question: Boolean indicating if a new random question should be evaluated
     '''
     reset_flags(model_builder, new_question)
-    
+
     model_builder.ranking_array = create_unperturbed_ranking_array(
         model_builder, ranker, path)
     print_ranked_answers(model_builder, model_builder.ranking_array)
-    
+
     user_answer_num = int(input("Please select an answer to be perturbed: "))
     answer_num = convert_question_num(
         model_builder, user_answer_num)
@@ -33,9 +30,15 @@ def run(model_builder, ranker, path, new_question):
     perturb_amount = float(
         input("Please select an amount of perturbation: "))
 
-    init_variables(model_builder, ranker, path, answer_num, perturb_amount, reference_num, False)
+    init_variables(
+        model_builder,
+        ranker,
+        path,
+        answer_num,
+        perturb_amount,
+        reference_num,
+        False)
     print_ranked_answers(model_builder, model_builder.perturbed_ranking_array)
-
 
 def init_variables(
         model_builder,
@@ -69,7 +72,6 @@ def init_variables(
 
     remove_padding(model_builder)
 
-
 def create_unperturbed_ranking_array(model_builder, ranker, path):
     '''
       Creates unperturbed ranking array.
@@ -83,10 +85,9 @@ def create_unperturbed_ranking_array(model_builder, ranker, path):
         Array containing ranks based on unperturbed input
     '''
     predictions = model_builder.custom_predict(
-    False, ranker, input_fn=lambda: model_builder.predict_input_fn(path))
+        False, ranker, input_fn=lambda: model_builder.predict_input_fn(path))
 
     return next(predictions)
-
 
 def create_fgsm_ranking_array(model_builder, ranker, path):
     '''
@@ -107,12 +108,11 @@ def create_fgsm_ranking_array(model_builder, ranker, path):
 
     return next(predictions)
 
-
 def create_random_ranking_array(model_builder, ranker, path):
     '''
-    Creates randomly perturbed ranking array. Note that ranking array is 
+    Creates randomly perturbed ranking array. Note that ranking array is
     repeatedly created until direction of perturbation matches the direction
-    of fgsm perturbation. If after 5 tries result is still unsucessful,
+    of fgsm perturbation. If after _TIMEOUT tries result is still unsucessful,
     no random noise is generated.
 
     Args:
@@ -135,7 +135,7 @@ def create_random_ranking_array(model_builder, ranker, path):
             True, ranker, input_fn=lambda: model_builder.predict_input_fn(path))
         rand_ranks = next(predictions)
         count += 1
-        if count == _TIMEOUT:
+        if count == constants._TIMEOUT:
             print("Timeout: No random noise created")
             model_builder.random_noise = False
             return model_builder.ranking_array
@@ -158,13 +158,12 @@ def correct_rand_noise_direction(model_builder, random_ranking_array):
     rand_rank = random_ranking_array[model_builder.answer_number]
 
     if get_fgsm_direction(model_builder) == 1:
-      if rand_rank >= rank:
-        return True
+        if rand_rank >= rank:
+            return True
     else:
-      if rand_rank <= rank:
-        return True
+        if rand_rank <= rank:
+            return True
     return False
-
 
 def get_fgsm_direction(model_builder):
     """
@@ -179,17 +178,16 @@ def get_fgsm_direction(model_builder):
       1 or -1 where 1 indicates increasing the rank of the perturbed question
       and -1 indicates decreasing the rank of the perturbed question.
     """
-    if model_builder.ranking_array[model_builder.answer_number] > model_builder.ranking_array[model_builder.reference_number]:
-        #print("----------------Decreasing rank of question----------------")
+    rank = model_builder.ranking_array[model_builder.answer_number]
+    ref_rank = model_builder.ranking_array[model_builder.reference_number]
+    if rank > ref_rank:
         return -1
     else:
-        #print("----------------Increasing rank of question----------------")
         return 1
-
 
 def reset_flags(model_builder, new_question):
     """
-    Reset flags in the model so a new question/answer pair can 
+    Reset flags in the model so a new question/answer pair can
     be evaluated/perturbed.
 
     Args:
@@ -202,8 +200,6 @@ def reset_flags(model_builder, new_question):
         model_builder.first_eval = True
     else:
         model_builder.first_eval = False
-    
-
 
 def convert_question_num(model_builder, answer_num):
     '''
@@ -229,14 +225,12 @@ def convert_question_num(model_builder, answer_num):
 
     return rank_w_question[answer_num - 1][0]
 
-
 def remove_padding(model_builder):
     '''
     Removes padding from ranking arrays
 
     Args:
       model_builder: The model in use.
-
     '''
     answer_length = get_answer_size(model_builder)
     model_builder.perturbed_ranking_array = model_builder.perturbed_ranking_array[
@@ -244,12 +238,8 @@ def remove_padding(model_builder):
     model_builder.ranking_array = model_builder.ranking_array[:answer_length]
     model_builder.random_ranking_array = model_builder.random_ranking_array[:answer_length]
 
-
 def get_answer_size(model_builder):
-    """
-    Determines amount of answers to remove answers from ranking arrays.
-    """
+    """Determines amount of answers to remove answers from ranking arrays."""
     label = model_builder.labels_evaluated[0]
-    # label of -1 corresponds to padding
-    occurrences = np.count_nonzero(label == -1)
+    occurrences = np.count_nonzero(label == constants._PADDING_LABEL)
     return constants._LIST_SIZE - occurrences

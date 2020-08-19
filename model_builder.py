@@ -9,11 +9,9 @@ from tensorflow.python.framework import random_seed
 from tensorflow.python.training import checkpoint_management
 from tensorflow.python.training import training
 from tensorflow_estimator.python.estimator.mode_keys import ModeKeys
-
 from fgsm_calculations import *
 from model_eval import *
 import constants
-
 
 class ModelBuilder:
     """Wrapping class to encapsulate functions to build model"""
@@ -21,7 +19,7 @@ class ModelBuilder:
     def __init__(self):
 
         # Parameters set by user during runtime
-        self.reference_number = 1
+        self.reference_number = 0
         self.answer_number = 0
         self.perturb_amount = 0
 
@@ -63,9 +61,10 @@ class ModelBuilder:
         self.labels_tensor = None
         self.labels_evaluated = [0] * constants._LIST_SIZE
 
+        # Direction of random noise perturbation
         self.random_noise_input = produce_random_noise()
 
-        #Embedding for visualization
+        # Embedding for visualization
         self.random_embedding = None
         self.fgsm_embedding = None
 
@@ -92,8 +91,9 @@ class ModelBuilder:
 
     def input_fn(self, path, num_epochs=None):
         """Input function used during traning."""
+        # Ensures we don't add perturbation during training.
         self.perturb_on = tf.constant(
-            False)  # ensures we don't add perturbation during training
+            False)  
         context_feature_spec = tf.feature_column.make_parse_example_spec(
             self.context_feature_columns().values())
         label_column = tf.feature_column.numeric_column(

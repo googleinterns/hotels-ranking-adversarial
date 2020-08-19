@@ -5,7 +5,6 @@ import constants
 
 """Functions used in calculation of FGSM and random perturbations"""
 
-
 def _get_single_perturb_dir(model_builder, answer_num, feature_num):
     """
     Calculates the gradient of loss with respect to a singular scalar
@@ -36,7 +35,6 @@ def _get_single_perturb_dir(model_builder, answer_num, feature_num):
 
     return direction
 
-
 def _get_perturb_dir(model_builder, answer_num):
     """
     Calculates gradient of loss with respect to features for entire answer.
@@ -56,7 +54,6 @@ def _get_perturb_dir(model_builder, answer_num):
                                               answer_num,
                                               num)) for num in range(constants._EMBEDDING_DIMENSION,
                                                                      constants._FULL_EMBEDDING)]]
-
 
 def get_perturbed_input(model_builder, answer_num, perturb_amount):
     """
@@ -85,7 +82,6 @@ def get_perturbed_input(model_builder, answer_num, perturb_amount):
 
     return noise
 
-
 def produce_random_noise():
     """
     Generates random noise for which to compare against performance
@@ -98,7 +94,6 @@ def produce_random_noise():
     return [*[0] * constants._EMBEDDING_DIMENSION,
             *[np.sign(random.uniform(-1,
                                      1)) for _ in range(constants._EMBEDDING_DIMENSION)]]
-
 
 def calculate_grad_var_pair(model_builder):
     """
