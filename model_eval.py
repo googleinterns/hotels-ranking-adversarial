@@ -6,6 +6,7 @@ import copy
 
 """Functions to help with evaluation of model outside of model_builder"""
 
+_TIMEOUT = 4
 
 def run(model_builder, ranker, path, new_question):
     '''
@@ -134,7 +135,7 @@ def create_random_ranking_array(model_builder, ranker, path):
             True, ranker, input_fn=lambda: model_builder.predict_input_fn(path))
         rand_ranks = next(predictions)
         count += 1
-        if count == 4:
+        if count == _TIMEOUT:
             print("Timeout: No random noise created")
             model_builder.random_noise = False
             return model_builder.ranking_array
