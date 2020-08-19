@@ -12,12 +12,9 @@ if __name__ == "__main__":
     model_builder = ModelBuilder()
     ranker = model_builder.run_training()
     
-    
-    
     run(model_builder, ranker, constants._TEST_DATA_PATH, True)
     display_ranking_bar_graph(model_builder, sys.argv)
     display_embedding_graph(model_builder, sys.argv)
-    
 
     #Optionally input parameters manually
     '''
