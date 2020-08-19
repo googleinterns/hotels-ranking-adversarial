@@ -1,6 +1,8 @@
 import numpy as np
 import constants
 from print_answers import *
+from fgsm_calculations import *
+import copy
 
 """Functions to help with evaluation of model outside of model_builder"""
 
@@ -16,11 +18,11 @@ def run(model_builder, ranker, path, new_question):
         new_question: Boolean indicating if a new random question should be evaluated
     '''
     reset_flags(model_builder, new_question)
-
+    
     model_builder.ranking_array = create_unperturbed_ranking_array(
         model_builder, ranker, path)
     print_ranked_answers(model_builder, model_builder.ranking_array)
-
+    
     user_answer_num = int(input("Please select an answer to be perturbed: "))
     answer_num = convert_question_num(
         model_builder, user_answer_num)
@@ -109,7 +111,8 @@ def create_random_ranking_array(model_builder, ranker, path):
     '''
     Creates randomly perturbed ranking array. Note that ranking array is 
     repeatedly created until direction of perturbation matches the direction
-    of fgsm perturbation. If after 5 tries result is still un
+    of fgsm perturbation. If after 5 tries result is still unsucessful,
+    no random noise is generated.
 
     Args:
       model_builder: The model in use.
@@ -124,15 +127,16 @@ def create_random_ranking_array(model_builder, ranker, path):
         True, ranker, input_fn=lambda: model_builder.predict_input_fn(path))
 
     rand_ranks = next(predictions)
-
     count = 0
     while correct_rand_noise_direction(model_builder, rand_ranks) == False:
+        model_builder.random_noise_input = produce_random_noise()
         predictions = model_builder.custom_predict(
             True, ranker, input_fn=lambda: model_builder.predict_input_fn(path))
         rand_ranks = next(predictions)
         count += 1
-        if count == 5:
+        if count == 4:
             print("Timeout: No random noise created")
+            model_builder.random_noise = False
             return model_builder.ranking_array
     model_builder.random_noise = False
     return rand_ranks
@@ -184,42 +188,15 @@ def get_fgsm_direction(model_builder):
 
 def reset_flags(model_builder, new_question):
     """
-    Reset flags in the model so a new question/answer pair can be evaluated/perturbed.
+    Reset flags in the model so a new question/answer pair can 
+    be evaluated/perturbed.
 
     Args:
       model_builder: The model in use
+      new_question: Boolean indicating if a new question
+      should be evaluated
     """
-    '''
-    # Arrays with ranks of answers
-    model_builder.ranking_array = []
-    model_builder.perturbed_ranking_array = []
-    model_builder.random_ranking_array = []
 
-    # Array containing answer embeddings.
-    model_builder.embedded_features_tensor = None
-    model_builder.embedded_features_evaluated = [
-        [0.0] * constants._FULL_EMBEDDING] * constants._LIST_SIZE
-
-    # Array containing values for weights in first dense layer and gradient
-    # of logits wrt to those weights. Used for FGSM calculation.
-    model_builder.grad_variable_pair_tensor = None
-    model_builder.grad_variable_pair_evaluated = [
-        [[0] * constants._HIDDEN_LAYER_DIMS[0]] * constants._FULL_EMBEDDING] * 2
-    
-    # Textual features used for printing question/answers.
-    model_builder.query_features = None
-    model_builder.query_features_evaluated = None
-    model_builder.answer_features = None
-    model_builder.answer_features_evaluated = None
-    
-
-    # Labels used to determine number of answers/remove padding.
-    model_builder.labels_tensor = None
-    model_builder.labels_evaluated = [0]*constants._LIST_SIZE
-
-    model_builder.random_noise_input = None
-    model_builder.fgsm_noise_input = None
-    '''
     if new_question:
         model_builder.first_eval = True
     else:

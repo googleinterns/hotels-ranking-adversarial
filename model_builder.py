@@ -21,7 +21,7 @@ class ModelBuilder:
     def __init__(self):
 
         # Parameters set by user during runtime
-        self.reference_number = 0
+        self.reference_number = 1
         self.answer_number = 0
         self.perturb_amount = 0
 
@@ -64,7 +64,10 @@ class ModelBuilder:
         self.labels_evaluated = [0] * constants._LIST_SIZE
 
         self.random_noise_input = produce_random_noise()
-        self.fgsm_noise_input = None
+
+        #Embedding for visualization
+        self.random_embedding = None
+        self.fgsm_embedding = None
 
         self.optimizer = tf.compat.v1.train.AdagradOptimizer(
             learning_rate=constants._LEARNING_RATE)
@@ -176,6 +179,7 @@ class ModelBuilder:
                     inputs=cur_layer, rate=constants._DROPOUT_RATE, training=is_training)
             logits = tf.compat.v1.layers.dense(
                 cur_layer, units=constants._GROUP_SIZE)
+            
             self.logits_tensor = logits
 
             return logits
@@ -190,7 +194,10 @@ class ModelBuilder:
         noise = get_perturbed_input(
             self, self.answer_number, self.perturb_amount)
         noise_input = np.add(self.embedded_features_evaluated, noise)
-
+        if self.random_noise:
+            self.random_embedding = noise_input
+        else:
+            self.fgsm_embedding = noise_input
         return tf.convert_to_tensor(noise_input, dtype=tf.float32)
 
     def eval_metric_fns(self):
@@ -353,15 +360,15 @@ class ModelBuilder:
                      temp_query_features_evaluated,
                      temp_answer_features_evaluated,
                      temp_embedded_features_evaluated,
-                     temp_grad_variable_pair_evaluated,
                      temp_labels_evaluated,
-                     temp_normalized_features_evaluated] = mon_sess.run([predictions,
+                     temp_normalized_features_evaluated, 
+                     self.grad_variable_pair_evaluated,] = mon_sess.run([predictions,
                                                                          self.query_features,
                                                                          self.answer_features,
                                                                          self.embedded_features_tensor,
-                                                                         self.grad_variable_pair_tensor,
                                                                          self.labels_tensor,
-                                                                         self.normalized_features],
+                                                                         self.normalized_features, 
+                                                                         self.grad_variable_pair_tensor,],
                                                                         {self.perturb_on: perturb})
                     # Save values for tensors during first nonperturbed evaluation to be 
                     # used in next execution.
@@ -369,10 +376,8 @@ class ModelBuilder:
                         self.query_features_evaluated = temp_query_features_evaluated
                         self.answer_features_evaluated = temp_answer_features_evaluated
                         self.embedded_features_evaluated = temp_embedded_features_evaluated
-                        self.grad_variable_pair_evaluated = temp_grad_variable_pair_evaluated
                         self.labels_evaluated = temp_labels_evaluated
                         self.normalized_features_evaluated = temp_normalized_features_evaluated
-                        self.random_noise_input = produce_random_noise()
                         self.first_eval = False
 
                     if not yield_single_examples:
