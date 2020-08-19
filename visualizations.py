@@ -3,7 +3,6 @@ from matplotlib.lines import Line2D
 import numpy as np
 import constants
 from model_eval import *
-import constants
 
 """Visualizations for Model"""
 
@@ -12,6 +11,15 @@ _BLUE = '#20639B'
 _RED = '#ED553B'
 _YELLOW = '#FCE205'
 
+_FONT_SIZE = 22
+_BAR_WIDTH = 0.25
+_FIG_SIZE = (22, 8)
+
+_EPSILONS = np.arange(.1, .5, .1)
+
+_RANKING_FILENAME = "ranking_bar_plot.png"
+_EMBEDDING_FILENAME = "embedding_bar_plot.png"
+_EPSILON_FILENAME = "perturbation_v_epsilon_plot.png"
 
 def display_ranking_bar_graph(model_builder, argv):
     """
@@ -22,50 +30,43 @@ def display_ranking_bar_graph(model_builder, argv):
         model_builder: The model in use.
         argv: Command line input to be used for directory name.
     """
-    barWidth = 0.25
-    plt.figure(figsize=(22, 8))
-    plt.rcParams.update({'font.size': 22})
-
-    bars1 = model_builder.ranking_array
-    bars2 = model_builder.perturbed_ranking_array
-    bars3 = model_builder.random_ranking_array
+    plt.figure(figsize=_FIG_SIZE)
+    plt.rcParams.update({'font.size': _FONT_SIZE})
 
     # Set position of bar on X axis
-    r1 = np.arange(len(bars1))
-    r2 = [x + barWidth for x in r1]
-    r3 = [x + barWidth for x in r2]
+    ranking_range = np.arange(len(model_builder.ranking_array))
+    fgsm_ranking_range = [x + _BAR_WIDTH for x in ranking_range]
+    random_ranking_range = [x + _BAR_WIDTH for x in fgsm_ranking_range]
 
-    barlist1 = plt.bar(
-        r1,
-        bars1,
+    unperturbed_barlist = plt.bar(
+        ranking_range,
+        model_builder.ranking_array,
         color=_GREEN,
-        width=barWidth,
+        width=_BAR_WIDTH,
         label='Original Ranking')
-    barlist2 = plt.bar(
-        r2,
-        bars2,
+    fgsm_barlist = plt.bar(
+        fgsm_ranking_range,
+        model_builder.perturbed_ranking_array,
         color=_GREEN,
-        width=barWidth,
+        width=_BAR_WIDTH,
         label='Perturbed FGSM Ranking')
-    barlist3 = plt.bar(
-        r3,
-        bars3,
+    random_barlist = plt.bar(
+        random_ranking_range,
+        model_builder.random_ranking_array,
         color=_GREEN,
-        width=barWidth,
+        width=_BAR_WIDTH,
         label='Perturbed Random Ranking')
 
-    barlist1[model_builder.reference_number].set_color(_YELLOW)
-    barlist2[model_builder.reference_number].set_color(_YELLOW)
-    barlist3[model_builder.reference_number].set_color(_YELLOW)
-
-    barlist2[model_builder.answer_number].set_color(_BLUE)
-    barlist3[model_builder.answer_number].set_color(_RED)
+    unperturbed_barlist[model_builder.reference_number].set_color(_YELLOW)
+    fgsm_barlist[model_builder.reference_number].set_color(_YELLOW)
+    random_barlist[model_builder.reference_number].set_color(_YELLOW)
+    fgsm_barlist[model_builder.answer_number].set_color(_BLUE)
+    random_barlist[model_builder.answer_number].set_color(_RED)
 
     plt.xlabel('Answer ID', fontweight='bold')
     # Add xticks on the middle of the group bars
-    plt.xticks([r + barWidth for r in range(len(bars1))],
-               np.arange(1, len(bars1) + 1))
-
+    plt.xticks([r + _BAR_WIDTH for r in range(len(model_builder.ranking_array))],
+               np.arange(1, len(model_builder.ranking_array) + 1))
     plt.ylabel('Ranking Score', fontweight='bold')
     plt.title('Answer Rankings', fontweight='bold')
 
@@ -81,81 +82,78 @@ def display_ranking_bar_graph(model_builder, argv):
                 'Perturbed Random Ranking',
                 'Reference Answer Ranking'])
 
-    if len(argv) > 1:
-        plt.savefig(argv[1] + "/plot.png")
-    else:
-        plt.savefig("plot.png")
+    plt.savefig(argv[1] + "/" + _RANKING_FILENAME)
     plt.show()
 
 
 def display_embedding_graph(model_builder, argv):
     '''
-    Saves and displays graph of word embeddings, comparin embeddings of
+    Saves and displays graph of word embeddings, comparing embeddings of
     nonperturbed, fgsm perturbed and randomly perturbed input.
 
     Args:
         model_builder: The model in use.
         argv: Command line input to be used for directory name.
     '''
-    barWidth = 0.25
-    plt.figure(figsize=(22, 8))
-    plt.rcParams.update({'font.size': 22})
+    plt.figure(figsize=_FIG_SIZE)
+    plt.rcParams.update({'font.size': _FONT_SIZE})
 
-    bars1 = model_builder.embedded_features_evaluated[
+    unperturbed_bar = model_builder.embedded_features_evaluated[
         model_builder.answer_number][constants._EMBEDDING_DIMENSION:]
-    bars2 = model_builder.fgsm_noise_input
-    bars3 = model_builder.random_noise_input
+    fgsm_bar = model_builder.fgsm_embedding[
+        model_builder.answer_number][constants._EMBEDDING_DIMENSION:]
+    random_bar = model_builder.random_embedding[
+        model_builder.answer_number][constants._EMBEDDING_DIMENSION:]
 
     # Set position of bar on X axis
-    r1 = np.arange(1, len(bars1) + 1)
-    r2 = [x + barWidth for x in r1]
-    r3 = [x + barWidth for x in r2]
+    embedding_range = np.arange(1, len(unperturbed_bar) + 1)
+    fgsm_embedding_range = [x + _BAR_WIDTH for x in embedding_range]
+    random_embedding_range = [x + _BAR_WIDTH for x in fgsm_embedding_range]
 
-    barlist1 = plt.bar(
-        r1,
-        bars1,
+    plt.bar(
+        embedding_range,
+        unperturbed_bar,
         color=_GREEN,
-        width=barWidth,
+        width=_BAR_WIDTH,
         edgecolor='white',
         label='Original Embedding')
-    barlist2 = plt.bar(
-        r2,
-        bars2,
+    plt.bar(
+        fgsm_embedding_range,
+        fgsm_bar,
         color=_BLUE,
-        width=barWidth,
+        width=_BAR_WIDTH,
         edgecolor='white',
         label='Embedding with FGSM Noise')
-    barlist3 = plt.bar(
-        r3,
-        bars3,
+    plt.bar(
+        random_embedding_range,
+        random_bar,
         color=_RED,
-        width=barWidth,
+        width=_BAR_WIDTH,
         edgecolor='white',
         label='Embedding with Random Noise')
 
     # Add xticks on the middle of the group bars
     plt.xlabel('Embedding Dimension', fontweight='bold')
-    plt.xticks([r + barWidth + 1 for r in range(len(bars1))],
-               np.arange(1, len(bars1) + 1))
+    plt.xticks([r + _BAR_WIDTH + 1 for r in range(len(unperturbed_bar))],
+               np.arange(1, len(unperturbed_bar) + 1))
 
     plt.ylabel('Embedding Value', fontweight='bold')
     plt.title('Answer Embeddings', fontweight='bold')
 
-    
     plt.legend()
-
-    if len(argv) > 1:
-        plt.savefig(argv[1] + "/embedding.png")
-    else:
-        plt.savefig("embedding.png")
+    plt.savefig(argv[1] + "/" + _EMBEDDING_FILENAME)
     plt.show()
-    
 
 
-def display_perturbation_vs_epsilon(model_builder, ranker, answer_num, ref_num, epsilons):
+def perturbation_vs_epsilon(
+        model_builder,
+        ranker,
+        answer_num,
+        ref_num,
+        epsilons):
     '''
-    Calculates the difference between unperturbed input rank and fgsm/randomly 
-    perturbed input over a variety of epsilon values.
+    Calculates the difference between unperturbed input rank and 
+    fgsm/randomly perturbed input over a variety of epsilon values.
 
     Args:
         model_builder: The model in use.
@@ -165,27 +163,24 @@ def display_perturbation_vs_epsilon(model_builder, ranker, answer_num, ref_num, 
         epsilons: Array containing the different values for epsilon.
 
     Returns:
-        amount_of_perturbation_fgsm: Array containing amount of 
-        perturbation for FGSM perturbed input.
-        amount_of_perturbation_random: Array containing amount of 
-        perturbation for randomly perturbed input.
-
+        returns a tuple (r1, r2) where r1 is an array containing the
+        amount of perturbation for FGSM perturbed input and r2 is
+        an array containing amount of perturbation for randomly
+        perturbed input.
     '''
     amount_of_perturbation_fgsm = []
     amount_of_perturbation_random = []
-    
 
-    init_variables(model_builder, ranker, constants._TEST_DATA_PATH,
-                   answer_num, epsilons[0], ref_num, True)
-    for perturb in epsilons:
-        init_variables(
-            model_builder,
-            ranker,
-            constants._TEST_DATA_PATH,
-            answer_num,
-            perturb,
-            ref_num,
-            False)
+    init_variables(
+        model_builder=model_builder,
+        ranker=ranker,
+        path=constants._TEST_DATA_PATH,
+        answer_num=answer_num,
+        perturb_amount=epsilons[0],
+        reference_num=ref_num,
+        new_question=True)
+
+    for num in range(1, len(epsilons)):
         change_in_rank_fgsm = abs(
             model_builder.ranking_array[answer_num] -
             model_builder.perturbed_ranking_array[answer_num])
@@ -195,10 +190,28 @@ def display_perturbation_vs_epsilon(model_builder, ranker, answer_num, ref_num, 
             model_builder.ranking_array[answer_num] -
             model_builder.random_ranking_array[answer_num])
         amount_of_perturbation_random.append(change_in_rank_random)
+        init_variables(
+            model_builder=model_builder,
+            ranker=ranker,
+            path=constants._TEST_DATA_PATH,
+            answer_num=answer_num,
+            perturb_amount=epsilons[num],
+            reference_num=ref_num,
+            new_question=False)
+    change_in_rank_fgsm = abs(
+        model_builder.ranking_array[answer_num] -
+        model_builder.perturbed_ranking_array[answer_num])
+    amount_of_perturbation_fgsm.append(change_in_rank_fgsm)
+
+    change_in_rank_random = abs(
+        model_builder.ranking_array[answer_num] -
+        model_builder.random_ranking_array[answer_num])
+    amount_of_perturbation_random.append(change_in_rank_random)
     return amount_of_perturbation_fgsm, amount_of_perturbation_random
 
 
-def perturbation_vs_epsilon_graph(model_builder, ranker, answer_num, ref_num, argv):
+def display_perturbation_vs_epsilon_graph(
+        model_builder, ranker, answer_num, ref_num, argv):
     """
     Creates and saves bar graph showing difference in perturbation for both
     fgsm-perturbed and random-perturbed input for a variety of epsilon values.
@@ -210,48 +223,45 @@ def perturbation_vs_epsilon_graph(model_builder, ranker, answer_num, ref_num, ar
         ref_num: The reference answer for the perturbed answer.
         argv: Command line input to be used for directory name.
     """
-    #range of epsilons can be modified as desired to change
-    #number of bars or increment size
-    epsilons = np.arange(.1, .5, .1)
-    amount_of_perturbation_fgsm, amount_of_perturbation_random = perturbation_vs_epsilon(
-        model_builder, ranker, answer_num, ref_num, epsilons)
+    # range of epsilons can be modified as desired to change
+    # number of bars or increment size
 
-    barWidth = 0.25
-    plt.figure(figsize=(22, 8))
-    plt.rcParams.update({'font.size': 22})
+    amount_of_perturbation_fgsm, amount_of_perturbation_random = perturbation_vs_epsilon(
+        model_builder, ranker, answer_num, ref_num, _EPSILONS)
+
+    plt.figure(figsize=_FIG_SIZE)
+    plt.rcParams.update({'font.size': _FONT_SIZE})
 
     # Set position of bar on X axis
-    r1 = np.arange(1, len(amount_of_perturbation_fgsm) + 1)
-    r2 = [x + barWidth for x in r1]
+    fgsm_perturbation_range = np.arange(
+        1, len(amount_of_perturbation_fgsm) + 1)
+    random_perturbation_range = [
+        x + _BAR_WIDTH for x in fgsm_perturbation_range]
 
-    barlist1 = plt.bar(
-        r1,
+    plt.bar(
+        fgsm_perturbation_range,
         amount_of_perturbation_fgsm,
         color='#3CAEA3',
-        width=barWidth,
+        width=_BAR_WIDTH,
         edgecolor='white',
         label='Perturbation with FGSM Noise')
-    barlist2 = plt.bar(
-        r2,
+    plt.bar(
+        random_perturbation_range,
         amount_of_perturbation_random,
         color='#20639B',
-        width=barWidth,
+        width=_BAR_WIDTH,
         edgecolor='white',
         label='Perturbation with Random Noise')
 
     # Add xticks on the middle of the group bars
     plt.xlabel('Epsilon Value', fontweight='bold')
-    plt.xticks(
-        [r for r in range(1, len(amount_of_perturbation_fgsm) + 1)], (str(num)[:3] for num in epsilons))
+    plt.xticks([r for r in range(1,
+                                 len(amount_of_perturbation_fgsm) + 1)],
+               ('{0:4.2f}'.format(num) for num in _EPSILONS))
 
     plt.ylabel('Difference in Ranking Score', fontweight='bold')
     plt.title('Amount of Perturbation vs Epsilon Value', fontweight='bold')
 
     plt.legend()
-
-    if len(argv) > 1:
-        plt.savefig(argv[1] + "/perturbation_v_epsilon.png")
-    else:
-        plt.savefig("perturbation_v_epsilon.png")
+    plt.savefig(argv[1] + "/" + _EPSILON_FILENAME)
     plt.show()
-  
