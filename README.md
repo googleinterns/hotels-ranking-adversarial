@@ -1,4 +1,4 @@
-# Hotels Ranking Adversarial
+# Adversarial Examples for Textual Features
 
 This repository demonstrates the generation of adversarial examples for textual features using the Fast Gradient Signed Method (FGSM), as described by [Explaining and Harnessing Adversarial Examples](https://arxiv.org/abs/1412.6572) by Goodfellow et al. 
 
