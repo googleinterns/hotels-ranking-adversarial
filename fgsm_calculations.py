@@ -11,7 +11,7 @@ def _get_single_perturb_dir(model_builder, answer_num, feature_num):
     feature embedding. Used to calculate FGSM perturbation.
 
     Args:
-      model_builder: The model in use
+      model_builder: The model in use.
       answer_num: Integer representing answer to be perturbed.
       feature_num: Integer for feature for which to calculate gradient with respect to.
 
@@ -27,7 +27,7 @@ def _get_single_perturb_dir(model_builder, answer_num, feature_num):
         feature = features[answer_num][feature_num]
         # mathmatically feature value has no impact here since in coming
         # steps we take the sign of the calculation but was included for
-        # completeness
+        # completeness.
         if feature != 0:
             direction += grad * (weight / feature)
         else:
@@ -117,7 +117,7 @@ def calculate_grad_var_pair(model_builder):
     gradient = None
     for x in _gradient:
         # filter out everything except for weights/gradients in first dense
-        # layer
+        # layer.
         if 'group_score/dense/kernel:0' in x[1].name:
             gradient = x
 

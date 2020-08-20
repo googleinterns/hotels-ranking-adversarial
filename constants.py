@@ -35,7 +35,7 @@ _MODEL_DIR = "/tmp/ranking_model_dir"
 _NUM_TRAIN_STEPS = 16000
 
 _EMBEDDING_DIMENSION = 20
-# Embedding Dimension to encode both question and answer
+# Embedding Dimension to encode both question and answer.
 _FULL_EMBEDDING = _EMBEDDING_DIMENSION * 2
 
 # Amount of tries to generate random noise.
@@ -51,7 +51,7 @@ _BAR_WIDTH = 0.25
 _FIG_SIZE = (22, 8)
 
 # Other visualization constants.
-_EPSILONS = np.arange(.1, .5, .1)
+_EPSILONS = np.arange(.01, .05, .01)
 
 _RANKING_FILENAME = "ranking_bar_plot.png"
 _EMBEDDING_FILENAME = "embedding_bar_plot.png"

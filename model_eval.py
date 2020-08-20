@@ -3,7 +3,7 @@ import constants
 from print_answers import *
 from fgsm_calculations import *
 
-"""Functions to help with evaluation of model outside of model_builder"""
+"""Functions to help with evaluation of model outside of model_builder."""
 
 def run(model_builder, ranker, path, new_question):
     '''
@@ -11,9 +11,9 @@ def run(model_builder, ranker, path, new_question):
 
     Args:
         model_builder: The model in use.
-        Ranker: Ranking object
+        Ranker: Ranking object.
         path: The path to test or training dataset.
-        new_question: Boolean indicating if a new random question should be evaluated
+        new_question: Boolean indicating if a new random question should be evaluated.
     '''
     reset_flags(model_builder, new_question)
 
@@ -82,7 +82,7 @@ def create_unperturbed_ranking_array(model_builder, ranker, path):
         path: The path to test or training dataset.
 
       Returns:
-        Array containing ranks based on unperturbed input
+        Array containing ranks based on unperturbed input.
     '''
     predictions = model_builder.custom_predict(
         False, ranker, input_fn=lambda: model_builder.predict_input_fn(path))
@@ -191,9 +191,9 @@ def reset_flags(model_builder, new_question):
     be evaluated/perturbed.
 
     Args:
-      model_builder: The model in use
+      model_builder: The model in use.
       new_question: Boolean indicating if a new question
-      should be evaluated
+      should be evaluated.
     """
 
     if new_question:
@@ -208,7 +208,7 @@ def convert_question_num(model_builder, answer_num):
 
     Args:
       model_builder: The model in use.
-      answer_num: Answer number selected externally by user
+      answer_num: Answer number selected externally by user.
 
     Returns:
       Question number for internal use.
@@ -227,7 +227,7 @@ def convert_question_num(model_builder, answer_num):
 
 def remove_padding(model_builder):
     '''
-    Removes padding from ranking arrays
+    Removes padding from ranking arrays.
 
     Args:
       model_builder: The model in use.

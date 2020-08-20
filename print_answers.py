@@ -1,4 +1,4 @@
-"""Methods used to print queries/answers"""
+"""Methods used to print queries/answers."""
 
 def _print_query(model_builder):
     """Prints singular question.
@@ -16,7 +16,7 @@ def _create_answer_array(model_builder):
     """Creates and returns an array of unranked answers.
 
     Args:
-      model_builder: The model in use
+      model_builder: The model in use.
 
     Returns:
       An array containing the unranked answers for question selected.
@@ -51,7 +51,7 @@ def create_ranked_answers_array(model_builder, ranking_array):
       ranking_array: Array containing ranks of all answers.
 
     Returns:
-      Array of tubles where each pair is of the format (answer, rank)
+      Array of tubles where each pair is of the format (answer, rank).
     """
     answer_array = _create_answer_array(model_builder)
 
@@ -61,7 +61,7 @@ def create_ranked_answers_array(model_builder, ranking_array):
     for count in range(length):
         question_rank_pair = (answer_array[count], ranking_array[count])
         ranked_answers.append(question_rank_pair)
-    # Answers with the highest score should come first
+    # Answers with the highest score should come first.
     ranked_answers.sort(key=lambda x: x[1], reverse=True)
 
     return ranked_answers

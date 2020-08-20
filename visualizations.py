@@ -4,9 +4,9 @@ import numpy as np
 import constants
 from model_eval import *
 
-"""Visualizations for Model"""
+"""Visualizations for Model."""
 
-def display_ranking_bar_graph(model_builder, argv):
+def display_ranking_bar_graph(model_builder, directory):
     """
     Saves and displays bar graph comparing answer rankings for
     nonperturbed input, fgsm perturbed input and randomly perturbed input
@@ -18,7 +18,7 @@ def display_ranking_bar_graph(model_builder, argv):
     plt.figure(figsize=constants._FIG_SIZE)
     plt.rcParams.update({'font.size': constants._FONT_SIZE})
 
-    # Set position of bar on X axis
+    # Set position of bar on X axis.
     ranking_range = np.arange(len(model_builder.ranking_array))
     fgsm_ranking_range = [x + constants._BAR_WIDTH for x in ranking_range]
     random_ranking_range = [x + constants._BAR_WIDTH for x in fgsm_ranking_range]
@@ -49,13 +49,13 @@ def display_ranking_bar_graph(model_builder, argv):
     random_barlist[model_builder.answer_number].set_color(constants._RED)
 
     plt.xlabel('Answer ID', fontweight='bold')
-    # Add xticks on the middle of the group bars
+    # Add xticks on the middle of the group bars.
     plt.xticks([r + constants._BAR_WIDTH for r in range(len(model_builder.ranking_array))],
                np.arange(1, len(model_builder.ranking_array) + 1))
     plt.ylabel('Ranking Score', fontweight='bold')
     plt.title('Answer Rankings', fontweight='bold')
 
-    # Create legend
+    # Create legend.
     colors = [
         Line2D([0], [0], color=constants._GREEN, lw=8),
         Line2D([0], [0], color=constants._BLUE, lw=8),
@@ -67,10 +67,10 @@ def display_ranking_bar_graph(model_builder, argv):
                 'Perturbed Random Ranking',
                 'Reference Answer Ranking'])
 
-    plt.savefig(argv[1] + "/" + constants._RANKING_FILENAME)
+    plt.savefig(directory + constants._RANKING_FILENAME)
     plt.show()
 
-def display_embedding_graph(model_builder, argv):
+def display_embedding_graph(model_builder, directory):
     '''
     Saves and displays graph of answer embeddings, comparing embeddings of
     nonperturbed, fgsm perturbed and randomly perturbed input.
@@ -89,7 +89,7 @@ def display_embedding_graph(model_builder, argv):
     random_bar = model_builder.random_embedding[
         model_builder.answer_number][constants._EMBEDDING_DIMENSION:]
 
-    # Set position of bar on X axis
+    # Set position of bar on X axis.
     embedding_range = np.arange(1, len(unperturbed_bar) + 1)
     fgsm_embedding_range = [x + constants._BAR_WIDTH for x in embedding_range]
     random_embedding_range = [x + constants._BAR_WIDTH for x in fgsm_embedding_range]
@@ -116,7 +116,7 @@ def display_embedding_graph(model_builder, argv):
         edgecolor='white',
         label='Embedding with Random Noise')
 
-    # Add xticks on the middle of the group bars
+    # Add xticks on the middle of the group bars.
     plt.xlabel('Embedding Dimension', fontweight='bold')
     plt.xticks([r + constants._BAR_WIDTH + 1 for r in range(len(unperturbed_bar))],
                np.arange(1, len(unperturbed_bar) + 1))
@@ -125,7 +125,7 @@ def display_embedding_graph(model_builder, argv):
     plt.title('Answer Embeddings', fontweight='bold')
 
     plt.legend()
-    plt.savefig(argv[1] + "/" + constants._EMBEDDING_FILENAME)
+    plt.savefig(directory + constants._EMBEDDING_FILENAME)
     plt.show()
 
 def perturbation_vs_epsilon(
@@ -193,7 +193,7 @@ def perturbation_vs_epsilon(
     return amount_of_perturbation_fgsm, amount_of_perturbation_random
 
 def display_perturbation_vs_epsilon_graph(
-        model_builder, ranker, answer_num, ref_num, argv):
+        model_builder, ranker, answer_num, ref_num, directory):
     """
     Saves and displays bar graph showing difference in perturbation for both
     fgsm-perturbed and random-perturbed input for a variety of epsilon values.
@@ -206,7 +206,7 @@ def display_perturbation_vs_epsilon_graph(
         argv: Command line input to be used for directory name.
     """
     amount_of_perturbation_fgsm, amount_of_perturbation_random = perturbation_vs_epsilon(
-        model_builder, ranker, answer_num, ref_num, _EPSILONS)
+        model_builder, ranker, answer_num, ref_num, constants._EPSILONS)
 
     plt.figure(figsize=constants._FIG_SIZE)
     plt.rcParams.update({'font.size': constants._FONT_SIZE})
@@ -232,7 +232,7 @@ def display_perturbation_vs_epsilon_graph(
         edgecolor='white',
         label='Perturbation with Random Noise')
 
-    # Add xticks on the middle of the group bars
+    # Add xticks on the middle of the group bars.
     plt.xlabel('Epsilon Value', fontweight='bold')
     plt.xticks([r for r in range(1,
                                  len(amount_of_perturbation_fgsm) + 1)],
@@ -242,5 +242,5 @@ def display_perturbation_vs_epsilon_graph(
     plt.title('Amount of Perturbation vs Epsilon Value', fontweight='bold')
 
     plt.legend()
-    plt.savefig(argv[1] + "/" + constants._EPSILON_FILENAME)
+    plt.savefig(directory + constants._EPSILON_FILENAME)
     plt.show()

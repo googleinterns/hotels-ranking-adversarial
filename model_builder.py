@@ -14,23 +14,23 @@ from model_eval import *
 import constants
 
 class ModelBuilder:
-    """Wrapping class to encapsulate functions to build model"""
+    """Wrapping class to encapsulate functions to build model."""
 
     def __init__(self):
 
-        # Parameters set by user during runtime
+        # Parameters set by user during runtime.
         self.reference_number = 0
         self.answer_number = 0
         self.perturb_amount = 0
 
-        # Flag to determine if using random noise
+        # Flag to determine if using random noise.
         self.random_noise = False  
 
         # Flag to determine if this is first evaluation (in which case we save
-        # tensor values)
+        # tensor values).
         self.first_eval = True
 
-        # Arrays with ranks of answers
+        # Arrays with ranks of answers.
         self.ranking_array = []
         self.perturbed_ranking_array = []
         self.random_ranking_array = []
@@ -61,10 +61,10 @@ class ModelBuilder:
         self.labels_tensor = None
         self.labels_evaluated = [0] * constants._LIST_SIZE
 
-        # Direction of random noise perturbation
+        # Direction of random noise perturbation.
         self.random_noise_input = produce_random_noise()
 
-        # Embedding for visualization
+        # Embedding for visualization.
         self.random_embedding = None
         self.fgsm_embedding = None
 
@@ -152,7 +152,7 @@ class ModelBuilder:
                 input_layer = tf.convert_to_tensor(
                     self.embedded_features_evaluated)
 
-            # Perturb input if indicated
+            # Perturb input if indicated.
             input_layer = tf.cond(
                 self.perturb_on,
                 lambda: self._perturbed_layer(),
@@ -190,7 +190,7 @@ class ModelBuilder:
         return layer
 
     def _perturbed_layer(self):
-        """Adds noise to answer embeddings"""
+        """Adds noise to answer embeddings."""
         noise = get_perturbed_input(
             self, self.answer_number, self.perturb_amount)
         noise_input = np.add(self.embedded_features_evaluated, noise)
@@ -284,7 +284,7 @@ class ModelBuilder:
         return ranker
 
     def predict_input_fn(self, path):
-        """Input function used during predictions"""
+        """Input function used during predictions."""
         context_feature_spec = tf.feature_column.make_parse_example_spec(
             self.context_feature_columns().values())
         label_column = tf.feature_column.numeric_column(
