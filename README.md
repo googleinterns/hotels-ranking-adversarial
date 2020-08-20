@@ -1,4 +1,4 @@
-# Hotels Ranking Adversarial
+# Adversarial Examples for Textual Features
 
 This repository demonstrates the generation of adversarial examples for textual features using the Fast Gradient Signed Method (FGSM), as described by [Explaining and Harnessing Adversarial Examples](https://arxiv.org/abs/1412.6572) by Goodfellow et al. 
 
@@ -54,7 +54,7 @@ wget -O "test.tfrecords" "http://ciir.cs.umass.edu/downloads/Antique/tf-ranking/
 ## Running the Code
 The code can be executed by calling the following:
 ```
-python main.py directory_name/
+python main.py directory_name
 ```
 If no argument is filled in for the directory, visualizations will be saved in the current directory by default. 
 
