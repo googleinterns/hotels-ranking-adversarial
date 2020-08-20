@@ -18,23 +18,23 @@ if __name__ == "__main__":
     ranker = model_builder.run_training()
     
     run(model_builder, ranker, constants._TEST_DATA_PATH, True)
-    display_ranking_bar_graph(model_builder, sys.argv)
-    display_embedding_graph(model_builder, sys.argv)
+    display_ranking_bar_graph(model_builder, FLAGS.directory)
+    display_embedding_graph(model_builder, FLAGS.directory)
 
     # Optionally input parameters manually.
     '''
     #init_variables(model_builder=model_builder, ranker=ranker, 
     				path=constants._TEST_DATA_PATH, answer_num=1, 
     				perturb_amount=.01, reference_num=3, new_question=True)
-    display_ranking_bar_graph(model_builder, sys.argv)
-    display_embedding_graph(model_builder, sys.argv)
+    display_ranking_bar_graph(model_builder, FLAGS.directory)
+    display_embedding_graph(model_builder, FLAGS.directory)
     '''
 
-    # Additional optional visualization
+    # Additional optional visualization.
     # Note this may take a minute to run due to
     # data collection.
     '''
     display_perturbation_vs_epsilon_graph(model_builder=model_builder, 
     									ranker=ranker, answer_num=1, 
-    									ref_num=2, argv=sys.argv)
+    									ref_num=2, directory=FLAGS.directory)
     '''
