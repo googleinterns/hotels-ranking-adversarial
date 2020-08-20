@@ -2,6 +2,8 @@
 
 This repository demonstrates the generation of adversarial examples for textual features using the Fast Gradient Signed Method (FGSM), as described by [Explaining and Harnessing Adversarial Examples](https://arxiv.org/abs/1412.6572) by Goodfellow et al. 
 
+The project was developed within Google's Hotels Ranking Team to study the effect of adverserial examples on textual features, which occur often within hotels ranking. However, due to security issues inherent to working from home, we did not have access to hotels ranking data. As a result this project was converted to be open-source and utilizes a model from Google's [TF-Ranking for sparse features tutorial](https://github.com/tensorflow/ranking/blob/master/tensorflow_ranking/examples/handling_sparse_features.ipynb) that provides a comparable framework for learning to rank with textual data.
+
 ## What is an Adversarial Example?
 An adversarial example is a specialized input meant to confuse a neural network. The most common example of adversarial examples is in the context of image classification. Small perturbations indistinguishable to the human eye are added to each pixel, causing the neural net to incorrectly classify the image. The example below, seen in the aforementioned paper, shows an image of a panda. Yet, after small perturbations are added the neural network incorrectly classifies the image as a gibbon.
 
@@ -54,7 +56,7 @@ wget -O "test.tfrecords" "http://ciir.cs.umass.edu/downloads/Antique/tf-ranking/
 ## Running the Code
 The code can be executed by calling the following:
 ```
-python main.py directory_name
+python main.py --directory=directory_name
 ```
 If no argument is filled in for the directory, visualizations will be saved in the current directory by default. 
 
@@ -70,6 +72,6 @@ This graph illustrates the differences in rank between the unperturbed, FGSM-per
 The graph above illustrates the answer embeddings for the unperturbed, FGSM-perturbed and randomly perturbed input. We observe that the magnitude of pertubation between the FGSM and randomly generated noise is the same, although the direction can be different.
 
 ![alt text](https://github.com/googleinterns/hotels-ranking-adversarial/blob/code-review/images/perturbation_vs_epsilon_graph.JPG  "Perturbation vs Epsilon Graph")
-This graph illustrates the relationship between epsilon and the amount of pertubation. We quantify the amount of perturbation by calculating the difference between the original ranking and the perturbed ranking for the specified question. Again, we observe that the FGSM generated noise outperforms the randomly generated noise. Additionally, we observe a larger value of epsilon results in a larger magnitude of perturbation.
+This graph illustrates the relationship between epsilon and the amount of pertubation. We quantify the amount of perturbation by calculating the difference between the original ranking and the perturbed ranking for the specified question. New random noise is generated for each run and again, we observe that the FGSM generated noise repeatedly outperforms the randomly generated noise. Additionally, we observe a larger value of epsilon results in a larger magnitude of perturbation.
 
 
