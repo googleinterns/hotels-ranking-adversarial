@@ -15,7 +15,7 @@ def run(model_builder, ranker, path, new_question):
         path: The path to test or training dataset.
         new_question: Boolean indicating if a new random question should be evaluated.
     '''
-    reset_flags(model_builder, new_question)
+    model_builder.first_eval = new_question
 
     model_builder.ranking_array = create_unperturbed_ranking_array(
         model_builder, ranker, path)
@@ -58,7 +58,7 @@ def init_variables(
       reference_num: Answer to be used as reference for direction of perturbation.
       new_question: Boolean indicating if a new random question should be evaluated.
     """
-    reset_flags(model_builder, new_question)
+    model_builder.first_eval = new_question
     model_builder.perturb_amount = perturb_amount
     model_builder.answer_number = answer_num
     model_builder.reference_number = reference_num
@@ -185,22 +185,6 @@ def get_fgsm_direction(model_builder):
     else:
         return 1
 
-def reset_flags(model_builder, new_question):
-    """
-    Reset flags in the model so a new question/answer pair can
-    be evaluated/perturbed.
-
-    Args:
-      model_builder: The model in use.
-      new_question: Boolean indicating if a new question
-      should be evaluated.
-    """
-
-    if new_question:
-        model_builder.first_eval = True
-    else:
-        model_builder.first_eval = False
-
 def convert_question_num(model_builder, answer_num):
     '''
     Converts the question number (based on sorted answers)
@@ -216,11 +200,7 @@ def convert_question_num(model_builder, answer_num):
     answer_length = get_answer_size(model_builder)
     no_padding_ranking = model_builder.ranking_array[:answer_length]
 
-    count = 0
-    rank_w_question = []
-    for rank in no_padding_ranking:
-        rank_w_question.append((count, rank))
-        count += 1
+    rank_w_question = list(enumerate(no_padding_ranking))
     rank_w_question.sort(key=lambda x: x[1], reverse=True)
 
     return rank_w_question[answer_num - 1][0]
