@@ -81,6 +81,9 @@ Finally, the order of the answers is printed again and we observe the impact of 
 
 ![alt text](https://github.com/googleinterns/hotels-ranking-adversarial/blob/code-review/images/perturbed_ranking.JPG  "Perturbed Ranking")
 
+Below is an animation showing the same process:
+![alt text](https://github.com/googleinterns/hotels-ranking-adversarial/blob/code-review/images/1080p.gif  "Animation")
+
 ## Additional Running Options
 ### Init Variables
 Calling the init_variables function, shown below, allows the user to directly specify parameters without typing input via the command line. The ranking and embeddings graphs discussed previously will be displayed, but the answers will not be printed. This can be a useful option to rapidly collect data with a variety of parameters. Additionally, a new random question is selected every run, unless the new_question parameter is set to False.
