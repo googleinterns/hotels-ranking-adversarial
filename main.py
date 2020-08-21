@@ -18,16 +18,17 @@ if __name__ == "__main__":
     ranker = model_builder.run_training()
     
     run(model_builder, ranker, constants._TEST_DATA_PATH, True)
-    display_ranking_bar_graph(model_builder, FLAGS.directory)
     display_embedding_graph(model_builder, FLAGS.directory)
+    display_ranking_bar_graph(model_builder, FLAGS.directory)
+    
 
     # Optionally input parameters manually.
     '''
-    #init_variables(model_builder=model_builder, ranker=ranker, 
+    init_variables(model_builder=model_builder, ranker=ranker, 
     				path=constants._TEST_DATA_PATH, answer_num=1, 
     				perturb_amount=.01, reference_num=3, new_question=True)
-    display_ranking_bar_graph(model_builder, FLAGS.directory)
     display_embedding_graph(model_builder, FLAGS.directory)
+    display_ranking_bar_graph(model_builder, FLAGS.directory)
     '''
 
     # Additional optional visualization.
